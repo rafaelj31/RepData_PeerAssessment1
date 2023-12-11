@@ -1,12 +1,6 @@
----
-title: "Activity Monitoring Data"
-author: "Hung Ruo Han"
-date: "March 26, 2017"
-output: 
-  html_document:
-    number_sections: true
-    keep_md: true
----
+# Activity Monitoring Data
+Hung Ruo Han  
+March 26, 2017  
 
 # Introduction
 
@@ -23,51 +17,82 @@ The variables included in dataset are:
 # SUBMISSION
 
 ## Code for reading in the dataset and/or processing the data
-```{r}
+
+```r
 data <- read.csv("activity.csv")
 ```
 
 ## Histogram of the total number of steps taken each day
-```{r}
+
+```r
 steps_by_day <- aggregate(steps ~ date, data, sum)
 hist(steps_by_day$steps, main = paste("Total Steps Each Day"), col="green", xlab="Number of Steps")
 ```
 
+![](PA1_template_files/figure-html/unnamed-chunk-2-1.png)<!-- -->
+
 ## Mean and median number of steps taken each day
-```{r}
+
+```r
 steps_by_day <- aggregate(steps ~ date, data, sum)
 rmean <- mean(steps_by_day$steps)
 rmedian <- median(steps_by_day$steps)
 sprintf("MEAN of steps taken each day = %.3f", rmean)
+```
+
+```
+## [1] "MEAN of steps taken each day = 10766.189"
+```
+
+```r
 sprintf("MEDIAN of steps taken each day = %.3f", rmedian)
 ```
 
+```
+## [1] "MEDIAN of steps taken each day = 10765.000"
+```
+
 ## Time series plot of the average number of steps taken
-```{r}
+
+```r
 steps_by_interval <- aggregate(steps ~ interval, data, mean)
 plot(steps_by_interval$interval,steps_by_interval$steps, type="l", xlab="Interval", ylab="Number of Steps",main="Average Number of Steps per Day by Interval")
 ```
 
+![](PA1_template_files/figure-html/unnamed-chunk-4-1.png)<!-- -->
+
 ## The 5-minute interval that, on average, contains the maximum number of steps
-```{r}
+
+```r
 max_interval <- steps_by_interval[which.max(steps_by_interval$steps),1]
 sprintf("MAXIMUM number of steps in 5-minute interval = %.0f", max_interval)
 ```
 
+```
+## [1] "MAXIMUM number of steps in 5-minute interval = 835"
+```
+
 ## Code to describe and show a strategy for imputing missing data
-```{r}
+
+```r
 incomplete_data <- sum(!complete.cases(data))
 sprintf("MISSING data = %.0f", incomplete_data)
 ```
 
+```
+## [1] "MISSING data = 2304"
+```
+
 The strategy is use the average value for that missing interval. For example, at "date"=="2012-10-01" the value 0 is NA, so the value 1.7169811 will be used as steps. This value came from the data set **steps_by_interval**.
 
-```{r}
+
+```r
 imputed_data <- transform(data, steps = ifelse(is.na(data$steps), steps_by_interval$steps[match(data$interval, steps_by_interval$interval)], data$steps))
 ```
 
 ## Histogram of the total number of steps taken each day after missing values are imputed
-```{r}
+
+```r
 imputed_steps_by_day <- aggregate(steps ~ date, imputed_data, sum)
 hist(imputed_steps_by_day$steps, main = paste("Total Steps Each Day"), col="green", xlab="Number of Steps")
 
@@ -75,35 +100,95 @@ hist(steps_by_day$steps, main = paste("Total Steps Each Day"), col="red", xlab="
 legend("topright", c("Imputed", "Non-imputed"), col=c("green", "red"), lwd=10)
 ```
 
+![](PA1_template_files/figure-html/unnamed-chunk-8-1.png)<!-- -->
+
 ### MEAN difference
-```{r}
+
+```r
 rmean <- mean(steps_by_day$steps)
 imputed_rmean <- mean(imputed_steps_by_day$steps)
 sprintf("MEAN of steps taken each day = %.3f", rmean)
+```
+
+```
+## [1] "MEAN of steps taken each day = 10766.189"
+```
+
+```r
 sprintf("MEAN of steps taken each day with IMPUTED data = %.3f", imputed_rmean)
+```
+
+```
+## [1] "MEAN of steps taken each day with IMPUTED data = 10766.189"
+```
+
+```r
 sprintf("The difference is %.3f ", imputed_rmean-rmean)
 ```
 
+```
+## [1] "The difference is 0.000 "
+```
+
 ### MEDIAN difference
-```{r}
+
+```r
 rmedian <- median(steps_by_day$steps)
 imputed_rmedian <- median(imputed_steps_by_day$steps)
 sprintf("MEDIAN of steps taken each day = %.3f", rmedian)
+```
+
+```
+## [1] "MEDIAN of steps taken each day = 10765.000"
+```
+
+```r
 sprintf("MEDIAN of steps taken each day with IMPUTED data = %.3f", imputed_rmedian)
+```
+
+```
+## [1] "MEDIAN of steps taken each day with IMPUTED data = 10766.189"
+```
+
+```r
 sprintf("The difference is %.3f ", imputed_rmedian-rmedian)
 ```
 
+```
+## [1] "The difference is 1.189 "
+```
+
 ### TOTAL steps difference
-```{r}
+
+```r
 total <- sum(steps_by_day$steps)
 imputed_total <- sum(imputed_steps_by_day$steps)
 sprintf("TOTAL of steps = %.3f", total)
+```
+
+```
+## [1] "TOTAL of steps = 570608.000"
+```
+
+```r
 sprintf("TOTAL of steps with IMPUTED data = %.3f", imputed_total)
+```
+
+```
+## [1] "TOTAL of steps with IMPUTED data = 656737.509"
+```
+
+```r
 sprintf("The difference is %.3f ", imputed_total-total)
 ```
 
+```
+## [1] "The difference is 86129.509 "
+```
+
 ## Panel plot comparing the average number of steps taken per 5-minute interval across weekdays and weekends
-```{r}
+
+```r
 weekend_days_set <- c("Saturday", "Sunday")
 imputed_data$dow = as.factor(ifelse(is.element(weekdays(as.Date(imputed_data$date)),weekend_days_set), "Weekend", "Weekday"))
 imputed_steps_by_interval <- aggregate(steps ~ interval + dow, imputed_data, mean)
@@ -112,4 +197,6 @@ library(lattice)
 
 xyplot(imputed_steps_by_interval$steps ~ imputed_steps_by_interval$interval|imputed_steps_by_interval$dow, main="Average Steps per Day by Interval",xlab="Interval", ylab="Steps",layout=c(1,2), type="l")
 ```
+
+![](PA1_template_files/figure-html/unnamed-chunk-12-1.png)<!-- -->
 
