@@ -1,6 +1,5 @@
 # Activity Monitoring Data
-Hung Ruo Han  
-March 26, 2017  
+
 
 # Introduction
 
